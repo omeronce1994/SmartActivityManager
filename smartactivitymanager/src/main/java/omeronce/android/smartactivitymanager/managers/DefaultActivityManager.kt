@@ -9,6 +9,7 @@ import omeronce.android.smartactivitymanager.enums.AppState
 import omeronce.android.smartactivitymanager.observers.AppStateObserver
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import java.lang.Exception
 import java.lang.IllegalStateException
 import java.lang.ref.WeakReference
 import java.util.*
@@ -24,7 +25,13 @@ internal class DefaultActivityManager: IActivityManager, AnkoLogger {
 
     override fun registerActivity(activity: Activity) {
         if (activity !is LifecycleOwner) {
-            throw IllegalStateException("SmartActivityManager does not support activities that does not implement LifecycleOwner interface")
+            //TODO: use this solution to avoid crash on instrumentation tests, find better solution
+            try {
+                throw IllegalStateException("${activity.javaClass.simpleName} is not a LifeCycleOwner." +
+                        "SmartActivityManager does not support activities that does not implement LifecycleOwner interface")
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
         else {
             val lifecycleOwner = activity as LifecycleOwner
